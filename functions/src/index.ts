@@ -37,12 +37,39 @@ export const noti = functions
     }
 
     console.log(alarms)
-    Object.values(alarms).forEach(async ({ token, message }: any) => {
+    Object.values(alarms).forEach(async ({
+      schedule,
+      month,
+      day,
+      hour,
+      minutes,
+      date,
+      message,
+      token,
+    }: any) => {
       if(token) {
+        const target = new Date(date)
+        let body = ''
+
+        switch (schedule) {
+          case 'everyWeek':
+          case 'today':
+            body = `${hour.padStart(2, 0)}:${minutes.padStart(2, 0)}`
+            break
+          case 'tomorrow':
+          case 'thisYear':
+          case 'nextYear':
+            body = `${hour.padStart(2, 0)}:${minutes.padStart(2, 0)} ${month}/${day}/${target.getFullYear()}`
+            break
+          default:
+            throw Error(`Invalid schedule: ${schedule}`)
+        }
+
         const payload = {
           notification: {
             title: message,
-            body: '10:00',
+            body,
+            icon: 'https://s3.ap-northeast-2.amazonaws.com/arl.im/android-chrome-192x192.png',
             click_action: 'https://arl.im',
           }
         }
