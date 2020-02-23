@@ -21,7 +21,6 @@ export const noti = functions
         .where('date', '<', currentTimeStamp + jobInterval)
         .get()
       const dayAlarms = await db.collection('alarms')
-        .where('days', 'array-contains', now.getDay())
         .where('time', '>=', time < jobInterval ? 0 : time)
         .where('time', '<', time + jobInterval)
         .get()
@@ -30,7 +29,10 @@ export const noti = functions
         alarms[doc.id] = doc.data()
       })
       dayAlarms.forEach(doc => {
-        alarms[doc.id] = doc.data()
+        const data = doc.data()
+        const day = new Date(now.valueOf() - (data.offset || 0) * 60 * 1000).getUTCDay()
+        if (data.days.includes(day))
+          alarms[doc.id] = data
       })
     } catch(e) {
       console.log('Error getting documents', e);
